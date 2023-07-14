@@ -38,7 +38,7 @@ BEGIN
 				usua_UsuarioModificacion = @usua_UsuarioCreacion,
 				motr_FechaModificacion = @motr_FechaCreacion
 				WHERE motr_Descripcion = @motr_Descripcion
-				SELECT 1
+				SELECT 'Act'
 			END
 		ELSE
 			BEGIN
@@ -49,7 +49,7 @@ BEGIN
 				@motr_FechaCreacion
 				)
 			END
-		SELECT 1
+		SELECT 'Ins'
 	END TRY
 	BEGIN CATCH
 		SELECT 0
@@ -98,6 +98,7 @@ BEGIN
 	BEGIN TRY
 		UPDATE Adua.tbModoTransporte
 		SET		motr_Estado = 0
+		WHERE motr_Id = @motr_Id
 		SELECT 1
 	END TRY
 	BEGIN CATCH
@@ -112,7 +113,7 @@ AS
 SELECT	tido_Id, 
 		tido_Descripcion, 
 		crea.usua_Nombre usua_UsuarioCreacion, 
-		tido_FechaCrea, 
+		tido_FechaCreacion, 
 		modi.usua_Nombre usua_UsuarioModificacion, 
 		tido_FechaModificacion, 
 		tido_Estado 
@@ -135,7 +136,7 @@ CREATE OR ALTER PROCEDURE Adua.UDP_tbTipoDocumento_Insertar
 @tido_Id				CHAR(4),
 @tido_Descripcion		NVARCHAR(50),
 @usua_UsuarioCreacion	INT,
-@tido_FechaCrea			DATETIME
+@tido_FechaCreacion			DATETIME
 AS
 BEGIN
 	BEGIN TRY
@@ -144,18 +145,18 @@ BEGIN
 				UPDATE Adua.tbTipoDocumento
 				SET tido_Estado = 1,
 				usua_UsuarioModificacion = @usua_UsuarioCreacion,
-				tido_FechaModificacion = @tido_FechaCrea
+				tido_FechaModificacion = @tido_FechaCreacion
 				WHERE @tido_Id = tido_Id
 				SELECT 1
 			END
 		ELSE
 			BEGIN
-				INSERT INTO Adua.tbTipoDocumento (tido_Id,tido_Descripcion,usua_UsuarioCreacion,tido_FechaCrea)
+				INSERT INTO Adua.tbTipoDocumento (tido_Id,tido_Descripcion,usua_UsuarioCreacion,tido_FechaCreacion)
 				VALUES (
 				@tido_Id,
 				@tido_Descripcion,
 				@usua_UsuarioCreacion,
-				@tido_FechaCrea
+				@tido_FechaCreacion
 				)
 				SELECT 1
 			END
@@ -180,7 +181,7 @@ BEGIN
 				UPDATE Adua.tbTipoDocumento
 				SET tido_Estado = 1,
 				usua_UsuarioModificacion = @usua_UsuarioModificacion,
-				tido_FechaCrea = @tido_FechaModificacion
+				tido_FechaCreacion = @tido_FechaModificacion
 				WHERE @tido_Id = tido_Id
 
 				SELECT 1
@@ -248,7 +249,6 @@ CREATE OR ALTER PROCEDURE Adua.UDP_tbTipoLiquidacion_Insertar
 @tipl_FechaCreacion		DATETIME
 AS
 BEGIN
-	BEGIN TRY
 		IF EXISTS (SELECT * FROM Adua.tbTipoLiquidacion WHERE tipl_Descripcion = @tipl_Descripcion AND tipl_Estado = 0)
 			BEGIN
 				UPDATE Adua.tbTipoLiquidacion
@@ -261,18 +261,15 @@ BEGIN
 			END
 		ELSE
 			BEGIN
-				INSERT INTO Adua.tbTipoLiquidacion (tipl_Descripcion,usua_UsuarioModificacion, tipl_FechaModificacion)
+				INSERT INTO Adua.tbTipoLiquidacion (tipl_Descripcion,usua_UsuarioCreacion, tipl_FechaCreacion)
 				VALUES (
 				@tipl_Descripcion,		
 				@usua_UsuarioCreacion,
-				@tipl_FechaCreacion	
+				@tipl_FechaCreacion		
 				)
+
 				SELECT 1
 			END
-	END TRY
-	BEGIN CATCH
-		SELECT 0
-	END CATCH
 END
 GO
 
@@ -350,8 +347,8 @@ END
 GO
 --*****Insertar*****--
 CREATE OR ALTER PROCEDURE Adua.UDP_tbEstadoBoletin_Insertar
-@esbo_Descripcion		INT,
-@usua_UsuarioCreacion	NVARCHAR(200),
+@esbo_Descripcion		NVARCHAR(200),
+@usua_UsuarioCreacion	INT,
 @esbo_FechaCreacion		DATETIME
 AS
 BEGIN
@@ -382,8 +379,8 @@ END
 GO
 --*****Editar*****--
 CREATE OR ALTER PROCEDURE Adua.UDP_tbEstadoBoletin_Editar
-@esbo_Id					INT,
-@esbo_Descripcion			NVARCHAR(200),
+@esbo_Id					NVARCHAR(200),
+@esbo_Descripcion			INT,
 @usua_UsuarioModificacion	INT,
 @esbo_FechaModificacion		DATETIME
 AS
@@ -414,3 +411,19 @@ BEGIN
 END
 GO
 --*****Eliminar*****--
+
+CREATE OR ALTER PROCEDURE Adua.UDP_tbEstadoBoletin_Eliminar
+@esbo_Id INT
+AS
+BEGIN
+BEGIN TRY
+	UPDATE Adua.tbEstadoBoletin
+	SET esbo_Estadoo = 0
+	WHERE esbo_Id = @esbo_Id
+	SELECT 1
+END TRY
+BEGIN CATCH
+	SELECT 0
+END CATCH
+END
+GO
