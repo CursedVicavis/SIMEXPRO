@@ -113,7 +113,7 @@ AS
 SELECT	tido_Id, 
 		tido_Descripcion, 
 		crea.usua_Nombre usua_UsuarioCreacion, 
-		tido_FechaCrea, 
+		tido_FechaCreacion, 
 		modi.usua_Nombre usua_UsuarioModificacion, 
 		tido_FechaModificacion, 
 		tido_Estado 
@@ -136,7 +136,7 @@ CREATE OR ALTER PROCEDURE Adua.UDP_tbTipoDocumento_Insertar
 @tido_Id				CHAR(4),
 @tido_Descripcion		NVARCHAR(50),
 @usua_UsuarioCreacion	INT,
-@tido_FechaCrea			DATETIME
+@tido_FechaCreacion			DATETIME
 AS
 BEGIN
 	BEGIN TRY
@@ -145,18 +145,18 @@ BEGIN
 				UPDATE Adua.tbTipoDocumento
 				SET tido_Estado = 1,
 				usua_UsuarioModificacion = @usua_UsuarioCreacion,
-				tido_FechaModificacion = @tido_FechaCrea
+				tido_FechaModificacion = @tido_FechaCreacion
 				WHERE @tido_Id = tido_Id
 				SELECT 1
 			END
 		ELSE
 			BEGIN
-				INSERT INTO Adua.tbTipoDocumento (tido_Id,tido_Descripcion,usua_UsuarioCreacion,tido_FechaCrea)
+				INSERT INTO Adua.tbTipoDocumento (tido_Id,tido_Descripcion,usua_UsuarioCreacion,tido_FechaCreacion)
 				VALUES (
 				@tido_Id,
 				@tido_Descripcion,
 				@usua_UsuarioCreacion,
-				@tido_FechaCrea
+				@tido_FechaCreacion
 				)
 				SELECT 1
 			END
@@ -181,7 +181,7 @@ BEGIN
 				UPDATE Adua.tbTipoDocumento
 				SET tido_Estado = 1,
 				usua_UsuarioModificacion = @usua_UsuarioModificacion,
-				tido_FechaCrea = @tido_FechaModificacion
+				tido_FechaCreacion = @tido_FechaModificacion
 				WHERE @tido_Id = tido_Id
 
 				SELECT 1
