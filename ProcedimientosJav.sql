@@ -1,4 +1,12 @@
 --*****Modo Transporte*****--
+--Insert Modo de Transporte
+INSERT INTO Adua.tbModoTransporte(motr_Descripcion,usua_UsuarioCreacion,motr_FechaCreacion)
+VALUES	('Marítimo',1,'2023-07-14 08:48'),
+		('Aéreo',1,'2023-07-14 08:48'),
+		('Terrestre',1,'2023-07-14 08:48'),
+		('Fluvial',1,'2023-07-14 08:48')
+
+GO
 --*****Vista*****--
 
 CREATE OR ALTER VIEW Adua.VW_tbModoTransporte
@@ -532,6 +540,123 @@ BEGIN
 		WHERE proc_ID = @proc_ID
 	END TRY
 	BEGIN CATCH 
+		SELECT 0
+	END CATCH
+END
+GO
+
+--*****AREA*****--
+--*****Vista*****--
+CREATE OR ALTER VIEW Prod.VW_tbArea
+AS
+SELECT	tipa_Id, 
+		tipa_area, 
+		pro.proc_Id, 
+		pro.proc_Descripcion,
+		crea.usua_Nombre usua_UsuarioCreacion, 
+		tipa_FechaCreacion, 
+		modi.usua_Nombre usua_UsuarioModificacion , 
+		tipa_FechaModificacion, 
+		tipa_Estado 
+FROM Prod.tbArea area INNER JOIN Prod.tbProcesos pro 
+ON area.proc_Id = pro.proc_Id  INNER JOIN Acce.tbUsuarios crea 
+ON crea.usua_Id = pro.usua_UsuarioCreacion INNER JOIN  Acce.tbUsuarios modi 
+ON modi.usua_Id = pro.usua_UsuarioModificacion
+GO
+
+--*****Listado*****--
+CREATE OR ALTER PROCEDURE Prod.UDP_tbArea_Listar
+AS
+BEGIN
+	SELECT * FROM Prod.VW_tbArea
+	WHERE tipa_Estado = 1
+END
+GO
+
+--*****Insertar*****--
+CREATE OR ALTER PROCEDURE Prod.UDP_tbArea_Insertar
+@tipa_area				NVARCHAR(200),
+@proc_Id				INT,
+@usua_UsuarioCreacion	INT,
+@tipa_FechaCreacion		DATETIME
+AS
+BEGIN
+	BEGIN TRY
+		IF EXISTS (SELECT * FROM Prod.tbArea WHERE tipa_area = @tipa_area AND proc_Id = @proc_Id)
+			BEGIN 
+				UPDATE Prod.tbArea
+				SET tipa_Estado = 1,
+				usua_UsuarioModificacion = @usua_UsuarioCreacion
+				tipa_FechaModificacion = @tipa_FechaCreacion
+				WHERE tipa_area = @tipa_area
+				SELECT 1
+			END
+		ELSE
+			BEGIN
+				INSERT INTO Prod.tbArea(tipa_area,proc_Id,usua_UsuarioCreacion,tipa_FechaCreacion)
+				VALUES (
+				@tipa_area,				
+				@proc_Id,				
+				@usua_UsuarioCreacion,	
+				@tipa_FechaCreacion				
+				)
+				SELECT 1
+			END
+	END TRY
+	BEGIN CATCH
+		SELECT 0
+	END CATCH
+END
+GO
+
+--*****Editar*****--
+
+CREATE OR ALTER PROCEDURE Prod.UDP_tbArea_Editar
+@tipa_Id					INT,
+@tipa_area					NVARCHAR(200),
+@proc_Id					INT,
+@usua_UsuarioModificacion	INT,
+@tipa_FechaModificacion		DATETIME
+AS
+BEGIN
+	BEGIN TRY
+		IF EXISTS (SELECT * FROM Prod.tbArea WHERE tipa_area = @tipa_area AND proc_Id = @proc_Id)
+			BEGIN 
+				UPDATE Prod.tbArea
+				SET tipa_Estado = 1,
+				usua_UsuarioModificacion = @usua_UsuarioModificacion,
+				tipa_FechaModificacion = @tipa_FechaModificacion
+				WHERE tipa_area = @tipa_area
+				SELECT 1
+			END
+		ELSE
+			BEGIN
+				UPDATE Prod.tbArea
+				SET tipa_area = @tipa_area,
+				proc_Id = @proc_Id,
+				usua_UsuarioModificacion = @usua_UsuarioModificacion,
+				tipa_FechaModificacion = @tipa_FechaModificacion
+				WHERE tipa_Id = @tipa_Id	
+				SELECT 1
+			END
+	END TRY
+	BEGIN CATCH
+		SELECT 0
+	END CATCH
+END
+GO
+
+--*****Eliminar*****--
+CREATE OR ALTER PROCEDURE Prod.UDP_tbArea_Eliminar
+@tipa_Id					INT
+AS
+BEGIN
+	BEGIN TRY
+		UPDATE Prod.tbArea
+		SET tipa_Estado = 0
+		WHERE tipa_Id = @tipa_Id
+	END TRY
+	BEGIN CATCH
 		SELECT 0
 	END CATCH
 END
