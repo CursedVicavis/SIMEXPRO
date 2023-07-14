@@ -411,3 +411,19 @@ BEGIN
 END
 GO
 --*****Eliminar*****--
+
+CREATE OR ALTER PROCEDURE Adua.UDP_tbEstadoBoletin_Eliminar
+@esbo_Id INT
+AS
+BEGIN
+BEGIN TRY
+	UPDATE Adua.tbEstadoBoletin
+	SET esbo_Estadoo = 0
+	WHERE esbo_Id = @esbo_Id
+	SELECT 1
+END TRY
+BEGIN CATCH
+	SELECT 0
+END CATCH
+END
+GO
