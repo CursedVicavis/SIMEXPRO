@@ -38,7 +38,7 @@ BEGIN
 				usua_UsuarioModificacion = @usua_UsuarioCreacion,
 				motr_FechaModificacion = @motr_FechaCreacion
 				WHERE motr_Descripcion = @motr_Descripcion
-				SELECT 'Act'
+				SELECT 0
 			END
 		ELSE
 			BEGIN
@@ -49,7 +49,7 @@ BEGIN
 				@motr_FechaCreacion
 				)
 			END
-		SELECT 'Ins'
+		SELECT 1
 	END TRY
 	BEGIN CATCH
 		SELECT 0
@@ -425,5 +425,114 @@ END TRY
 BEGIN CATCH
 	SELECT 0
 END CATCH
+END
+GO
+
+--*****Procesos*****--
+--*****Vista*****--
+
+CREATE OR ALTER VIEW Prod.VW_tbProceso
+AS
+SELECT	proc_Id, 
+		proc_Descripcion, 
+		crea.usua_Nombre usua_UsuarioCreacion, 
+		proc_FechaCreacion, 
+		modi.usua_Nombre usua_UsuarioModificacion, 
+		proc_FechaModificacion, 
+		proc_Estado 
+FROM Prod.tbProcesos pro INNER JOIN Acce.tbUsuarios crea 
+ON crea.usua_Id = pro.usua_UsuarioCreacion INNER JOIN  Acce.tbUsuarios modi 
+ON modi.usua_Id = pro.usua_UsuarioModificacion 
+GO
+--*****Listado*****--
+CREATE OR ALTER PROCEDURE Prod.UDP_tbProcesos_Listar
+AS
+BEGIN
+SELECT * FROM Prod.VW_tbProceso 
+WHERE proc_Estado = 1
+END
+GO
+
+--*****Insertar*****--
+CREATE OR ALTER PROCEDURE Prod.UDP_tbProcesos_Insertar
+@proc_Descripcion		NVARCHAR(200),
+@usua_UsuarioCreacion	INT,
+@proc_FechaCreacion		DATETIME
+AS
+BEGIN
+	BEGIN TRY
+		IF EXISTS (SELECT * FROM Prod.tbProcesos WHERE proc_Descripcion = @proc_Descripcion AND proc_Estado = 0)
+			BEGIN
+				UPDATE Prod.tbProcesos
+				SET proc_Estado = 1,
+				usua_UsuarioModificacion = @usua_UsuarioCreacion,
+				proc_FechaModificacion = @proc_FechaCreacion
+				WHERE proc_Descripcion = @proc_Descripcion
+				SELECT 1
+			END
+		ELSE
+			BEGIN
+				INSERT INTO Prod.tbProcesos(proc_Descripcion,usua_UsuarioCreacion,proc_FechaCreacion)
+				VALUES (
+				@proc_Descripcion,		
+				@usua_UsuarioCreacion,	
+				@proc_FechaCreacion
+				)
+				SELECT 1
+			END
+	END TRY
+	BEGIN CATCH
+		SELECT 0
+	END CATCH
+END
+GO
+
+--*****Editar*****--
+CREATE OR ALTER PROCEDURE Prod.UDP_tbProcesos_Editar
+@proc_ID				INT,
+@proc_Descripcion		NVARCHAR(200),
+@usua_UsuarioModificacion	INT,
+@proc_FechaCreacion		DATETIME
+AS
+BEGIN
+	BEGIN TRY
+		IF EXISTS (SELECT * FROM Prod.tbProcesos WHERE proc_Descripcion = @proc_Descripcion AND proc_Estado = 0)
+			BEGIN
+				UPDATE Prod.tbProcesos
+				SET proc_Estado = 1,
+				usua_UsuarioModificacion = @usua_UsuarioModificacion,
+				proc_FechaModificacion = @proc_FechaCreacion
+				WHERE proc_Descripcion = @proc_Descripcion
+				SELECT 1
+			END
+		ELSE
+			BEGIN
+				UPDATE Prod.tbProcesos
+				SET proc_Descripcion = @proc_Descripcion,
+				usua_UsuarioModificacion = @usua_UsuarioModificacion,
+				proc_FechaModificacion = @proc_FechaCreacion
+				WHERE proc_ID = @proc_ID
+				SELECT 1
+			END
+	END TRY
+	BEGIN CATCH
+		SELECT 0
+	END CATCH
+END
+GO
+
+--*****Eliminar*****--
+CREATE OR ALTER PROCEDURE Prod.UDP_tbProcesos_Eliminar
+@proc_ID	INT
+AS
+BEGIN
+	BEGIN TRY
+		UPDATE Prod.tbProcesos
+		SET proc_Estado = 0
+		WHERE proc_ID = @proc_ID
+	END TRY
+	BEGIN CATCH 
+		SELECT 0
+	END CATCH
 END
 GO
